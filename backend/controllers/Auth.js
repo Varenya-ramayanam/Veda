@@ -1,8 +1,11 @@
 const user = require('../models/User');
 const bcrypt = require('bcrypt');
+const { generateToken } = require('../utils/GenerateToken');
+const { sanitizeUser } = require('../utils/sanitizeUser');
 
 exports.register = async (req, res) => {
     try {
+        
         const { username, email, password } = req.body;
         if(!username || !email || !password) {
             return res.status(400).json({msg: "All fields are required"});
@@ -19,6 +22,16 @@ exports.register = async (req, res) => {
         password: hashedPassword
         });
         const user = await newUser.save();
+        const secureUser = sanitizeUser(user);
+        const token = generateToken(secureUser);
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'None',
+            maxAge: 3600000
+        });
+
         res.status(201).json(user);
     } catch (error) {
         console.log(error);
@@ -37,6 +50,14 @@ exports.login = async (req, res) => {
         if(!isPasswordCorrect) {
             return res.status(400).json({msg: "Invalid credentials"});
         }
+        const secureUser = sanitizeUser(existingUser);
+        const token = generateToken(secureUser);
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'None',
+            maxAge: 3600000
+        });
         res.status(200).json(existingUser);
     }
     catch (error) {
