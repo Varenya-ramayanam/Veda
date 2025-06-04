@@ -10,3 +10,13 @@
   padding-left: 2rem;
   padding-right: 2rem;
 }
+
+/* Hide scrollbar in all browsers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
