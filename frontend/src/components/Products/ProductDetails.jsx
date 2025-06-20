@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ProductGrid from "./ProductGrid";
 
 const selectedProduct = {
   name: "Abstract Canvas Painting",
@@ -17,6 +18,54 @@ const selectedProduct = {
     { url: "https://picsum.photos/400/500?random=13", alt: "Abstract Painting 3" },
   ],
 };
+
+
+const similarProducts = [
+  {
+    _id: "1",
+    name: "Modern Art Canvas",
+    price: 1200,
+    images: [
+      { url: "https://picsum.photos/400/500?random=21",
+        alt: "Modern Art 1" },
+      
+    ],
+
+  },
+  {
+    _id: "2",
+    name: "Modern Art Canvas",
+    price: 1200,
+    images: [
+      { url: "https://picsum.photos/400/500?random=22",
+        alt: "Modern Art 1" },
+      
+    ],
+    
+  },
+  {
+    _id: "3",
+    name: "Modern Art Canvas",
+    price: 1200,
+    images: [
+      { url: "https://picsum.photos/400/500?random=23",
+        alt: "Modern Art 1" },
+      
+    ],
+    
+  },
+  {
+    _id: "4",
+    name: "Modern Art Canvas",
+    price: 1200,
+    images: [
+      { url: "https://picsum.photos/400/500?random=24",
+        alt: "Modern Art 1" },
+      
+    ],
+    
+  },
+]
 
 const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState(selectedProduct.images[0].url);
@@ -135,7 +184,14 @@ const ProductDetails = () => {
             Add to Cart
           </button>
         </div>
+        
       </div>
+      <div className="mt-20 ">
+          <h2 className="text-2xl text-center font-medium mb-4">
+                You May also like
+          </h2>
+          <ProductGrid products={similarProducts}/>
+        </div>
     </div>
   );
 };
