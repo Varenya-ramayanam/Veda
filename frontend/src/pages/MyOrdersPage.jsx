@@ -5,9 +5,8 @@ const MyOrdersPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch orders from the API
+    // Simulate API call
     setTimeout(() => {
-      // Simulating an API call
       const fetchedOrders = [
         {
           _id: 1,
@@ -23,8 +22,8 @@ const MyOrdersPage = () => {
               image: "https://picsum.photos/200/300?random=1",
             },
           ],
-            totalPrice: 40,
-            isPaid: true,
+          totalPrice: 40,
+          isPaid: true,
         },
         {
           _id: 2,
@@ -40,8 +39,8 @@ const MyOrdersPage = () => {
               image: "https://picsum.photos/200/300?random=2",
             },
           ],
-            totalPrice: 30,
-            isPaid: false,
+          totalPrice: 30,
+          isPaid: false,
         },
         {
           _id: 3,
@@ -57,47 +56,80 @@ const MyOrdersPage = () => {
               image: "https://picsum.photos/200/300?random=3",
             },
           ],
-            totalPrice: 45,
-            isPaid: true,
-        }
+          totalPrice: 45,
+          isPaid: true,
+        },
       ];
       setOrders(fetchedOrders);
       setLoading(false);
     }, 1000);
   }, []);
 
-  return <div className="max-w-7xl mx-auto p-4 sm:p-6">
-    <h2 className="text-xl sm:text-2xl font-bold mb-6">
-        My Orders
-    </h2>
-    <div className="relative shadow-md sm:rounded-lg overflow-hidden">
-        <table className="min-w-full text-left text-gray-500">
-            <th  className="bg-gray-100 text-xs uppercase text-gray-700">
-                <tr className="py-2 px-4 sm:py-3">
-                    Image
+  return (
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">My Orders</h2>
+
+      {loading ? (
+        <div className="text-center text-gray-500">Loading orders...</div>
+      ) : (
+        <div className="overflow-x-auto shadow-md sm:rounded-lg border border-gray-200">
+          <table className="min-w-full text-sm text-left text-gray-700">
+            <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+              <tr>
+                <th className="py-3 px-4">Image</th>
+                <th className="py-3 px-4">Order ID</th>
+                <th className="py-3 px-4">Date</th>
+                <th className="py-3 px-4">Address</th>
+                <th className="py-3 px-4">Items</th>
+                <th className="py-3 px-4">Total Price</th>
+                <th className="py-3 px-4">Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr
+                  key={order._id}
+                  className="bg-white border-b hover:bg-gray-50 transition"
+                >
+                  <td className="py-3 px-4">
+                    <img
+                      src={order.orderItems[0].image}
+                      alt={order.orderItems[0].name}
+                      className="w-12 h-12 object-cover rounded-lg border"
+                    />
+                  </td>
+                  <td className="py-3 px-4">#{order._id}</td>
+                  <td className="py-3 px-4">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="py-3 px-4">{order.address}</td>
+                  <td className="py-3 px-4">
+                    {order.orderItems.map((item) => (
+                      <div key={item.id}>
+                        {item.name} × {item.quantity}
+                      </div>
+                    ))}
+                  </td>
+                  <td className="py-3 px-4 font-medium">₹{order.totalPrice}</td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        order.isPaid
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      {order.isPaid ? "Paid" : "Pending"}
+                    </span>
+                  </td>
                 </tr>
-                <tr className="py-2 px-4 sm:py-3">
-                    Order_id
-                </tr>
-                <tr className="py-2 px-4 sm:py-3">
-                    createdAt
-                </tr>
-                <tr className="py-2 px-4 sm:py-3">
-                    Address
-                </tr>
-                <tr className="py-2 px-4 sm:py-3">
-                    Order_Items
-                </tr>
-                <tr className="py-2 px-4 sm:py-3">
-                    Total_Price
-                </tr>
-                <tr className="py-2 px-4 sm:py-3">
-                    Paid
-                </tr>
-            </th>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
-  </div>;
+  );
 };
 
 export default MyOrdersPage;
