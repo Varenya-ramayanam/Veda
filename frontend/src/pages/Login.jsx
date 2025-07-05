@@ -1,10 +1,18 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LoginAnimation from "../components/Animations/LoginAnimation";
 
 const Login = () => {
+
+  const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Handle login logic here
+    console.log("Logging in with:", { email, password });
+    navigate("/");
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white px-4">
@@ -49,6 +57,7 @@ const Login = () => {
             <button
               type="submit"
               className="w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition"
+              onClick={handleLogin}
             >
               Login
             </button>

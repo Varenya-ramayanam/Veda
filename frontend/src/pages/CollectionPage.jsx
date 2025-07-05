@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaFilter } from "react-icons/fa";
 import FilterSidebar from "../components/Products/FilterSidebar";
 import SortOptions from "../components/Products/SortOptions";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 const CollectionPage = () => {
   const [products, setProducts] = useState([]);
@@ -168,32 +168,34 @@ const CollectionPage = () => {
         ) : (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
-              <div
-                key={product._id}
-                className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden flex flex-col"
-              >
-                <img
-                  src={product.images[0].url}
-                  alt={product.images[0].alt}
-                  className="w-full h-60 sm:h-64 object-cover"
-                />
-                <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-indigo-600 font-bold mt-2 text-base">
-                    ₹{product.price}
-                  </p>
-                  <div className="flex items-center mt-1 text-yellow-500 text-sm">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <span key={i}>{i < product.rating ? "★" : "☆"}</span>
-                    ))}
-                    <span className="ml-1 text-gray-600 text-xs">
-                      ({product.rating})
-                    </span>
+              <Link to={`/product/${product._id}`} key={product._id}>
+                <div
+                  key={product._id}
+                  className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden flex flex-col"
+                >
+                  <img
+                    src={product.images[0].url}
+                    alt={product.images[0].alt}
+                    className="w-full h-60 sm:h-64 object-cover"
+                  />
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-indigo-600 font-bold mt-2 text-base">
+                      ₹{product.price}
+                    </p>
+                    <div className="flex items-center mt-1 text-yellow-500 text-sm">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <span key={i}>{i < product.rating ? "★" : "☆"}</span>
+                      ))}
+                      <span className="ml-1 text-gray-600 text-xs">
+                        ({product.rating})
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
