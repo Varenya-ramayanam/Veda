@@ -5,7 +5,6 @@ const MyOrdersPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
     setTimeout(() => {
       const fetchedOrders = [
         {
@@ -72,61 +71,115 @@ const MyOrdersPage = () => {
       {loading ? (
         <div className="text-center text-gray-500">Loading orders...</div>
       ) : (
-        <div className="overflow-x-auto shadow-md sm:rounded-lg border border-gray-200">
-          <table className="min-w-full text-sm text-left text-gray-700">
-            <thead className="bg-gray-100 text-xs uppercase text-gray-600">
-              <tr>
-                <th className="py-3 px-4">Image</th>
-                <th className="py-3 px-4">Order ID</th>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Address</th>
-                <th className="py-3 px-4">Items</th>
-                <th className="py-3 px-4">Total Price</th>
-                <th className="py-3 px-4">Paid</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr
-                  key={order._id}
-                  className="bg-white border-b hover:bg-gray-50 transition"
-                >
-                  <td className="py-3 px-4">
-                    <img
-                      src={order.orderItems[0].image}
-                      alt={order.orderItems[0].name}
-                      className="w-12 h-12 object-cover rounded-lg border"
-                    />
-                  </td>
-                  <td className="py-3 px-4">#{order._id}</td>
-                  <td className="py-3 px-4">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4">{order.address}</td>
-                  <td className="py-3 px-4">
-                    {order.orderItems.map((item) => (
-                      <div key={item.id}>
-                        {item.name} × {item.quantity}
-                      </div>
-                    ))}
-                  </td>
-                  <td className="py-3 px-4 font-medium">₹{order.totalPrice}</td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        order.isPaid
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {order.isPaid ? "Paid" : "Pending"}
-                    </span>
-                  </td>
+        <>
+          {/* ✅ Table for medium+ screens */}
+          <div className="hidden sm:block overflow-x-auto shadow-md sm:rounded-lg border border-gray-200">
+            <table className="min-w-full text-sm text-left text-gray-700">
+              <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+                <tr>
+                  <th className="py-3 px-4">Image</th>
+                  <th className="py-3 px-4">Order ID</th>
+                  <th className="py-3 px-4">Date</th>
+                  <th className="py-3 px-4">Address</th>
+                  <th className="py-3 px-4">Items</th>
+                  <th className="py-3 px-4">Total Price</th>
+                  <th className="py-3 px-4">Paid</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr
+                    key={order._id}
+                    className="bg-white border-b hover:bg-gray-50 transition"
+                  >
+                    <td className="py-3 px-4">
+                      <img
+                        src={order.orderItems[0].image}
+                        alt={order.orderItems[0].name}
+                        className="w-12 h-12 object-cover rounded-lg border"
+                      />
+                    </td>
+                    <td className="py-3 px-4">#{order._id}</td>
+                    <td className="py-3 px-4">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4">{order.address}</td>
+                    <td className="py-3 px-4">
+                      {order.orderItems.map((item) => (
+                        <div key={item.id}>
+                          {item.name} × {item.quantity}
+                        </div>
+                      ))}
+                    </td>
+                    <td className="py-3 px-4 font-medium">₹{order.totalPrice}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          order.isPaid
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                      >
+                        {order.isPaid ? "Paid" : "Pending"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ✅ Card view for small screens */}
+          <div className="sm:hidden space-y-4">
+            {orders.map((order) => (
+              <div
+                key={order._id}
+                className="bg-white border rounded-lg p-4 shadow-sm space-y-2"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={order.orderItems[0].image}
+                    alt={order.orderItems[0].name}
+                    className="w-16 h-16 rounded-lg object-cover border"
+                  />
+                  <div>
+                    <p className="text-sm text-gray-700 font-medium">
+                      Order #{order._id}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <strong>Address:</strong> {order.address}
+                </div>
+                <div className="text-sm text-gray-600">
+                  <strong>Items:</strong>{" "}
+                  {order.orderItems.map((item) => (
+                    <span key={item.id}>
+                      {item.name} × {item.quantity},{" "}
+                    </span>
+                  ))}
+                </div>
+                <div className="text-sm text-gray-600">
+                  <strong>Total:</strong> ₹{order.totalPrice}
+                </div>
+                <div>
+                  <span
+                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                      order.isPaid
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-600"
+                    }`}
+                  >
+                    {order.isPaid ? "Paid" : "Pending"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

@@ -34,25 +34,25 @@ const NavBar = () => {
         {/* Center: Navigation Links */}
         <div className="hidden md:flex space-x-6">
           <Link
-            to="/gifts"
+            to="/collections/gifts"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Gifts
           </Link>
           <Link
-            to="/arts"
+            to="collections/arts"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Arts
           </Link>
           <Link
-            to="/decor"
+            to="collections/decor"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Handcrafted Decor
           </Link>
           <Link
-            to="/diy"
+            to="collections/diy"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             DIY & Craft Kits
