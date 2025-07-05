@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { FaStripe, FaPaypal, FaMoneyBillWaveAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const totalAmount = 800;
 const totalItems = 4;
 
 const PaymentOptions = () => {
   const [selectedMethod, setSelectedMethod] = useState(null);
-
+  const navigate = useNavigate();
   const handleConfirm = () => {
     if (!selectedMethod) return alert("Please select a payment method.");
     toast.success(`Proceeding with ${selectedMethod} payment`);
+    navigate("/order-confirmation");
   };
 
   const methods = [
@@ -82,6 +84,7 @@ const PaymentOptions = () => {
         >
           {selectedMethod ? `Pay with ${selectedMethod}` : "Select a Payment Method"}
         </button>
+        <h3>Payment options are added shortly</h3>
       </div>
     </div>
   );

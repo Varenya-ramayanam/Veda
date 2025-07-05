@@ -54,7 +54,7 @@ const Checkout = () => {
 
   const handleRemove = (id) => {
     setCartItems(cartItems.filter((item) => item.productId !== id));
-    toast.success("Removed from cart");
+    toast.error("Removed from cart");
   };
 
   const handleSaveForLater = (id) => {

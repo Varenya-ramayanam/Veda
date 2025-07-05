@@ -9,6 +9,7 @@ import CollectionPage from "./pages/CollectionPage";
 import ProductDetails from "./components/Products/ProductDetails";
 import Checkout from "./components/Cart/Checkout";
 import PaymentOptions from "./components/Cart/PaymentOptions";
+import OrderConfirmationPage from "./components/Cart/OrderConfirmationPage";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="product/:id" element={<ProductDetails />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="payment" element={<PaymentOptions />} />
+          <Route path="order-confirmation" element={<OrderConfirmationPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
