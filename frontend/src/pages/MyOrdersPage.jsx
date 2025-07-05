@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const MyOrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -99,7 +100,14 @@ const MyOrdersPage = () => {
                         className="w-12 h-12 object-cover rounded-lg border"
                       />
                     </td>
-                    <td className="py-3 px-4">#{order._id}</td>
+                    <td className="py-3 px-4">
+                      <Link
+                        to={`/order/${order._id}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        #{order._id}
+                      </Link>
+                    </td>
                     <td className="py-3 px-4">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
@@ -132,11 +140,12 @@ const MyOrdersPage = () => {
           {/* ✅ Card view for small screens */}
           <div className="sm:hidden space-y-4">
             {orders.map((order) => (
-              <div
+              <Link
                 key={order._id}
-                className="bg-white border rounded-lg p-4 shadow-sm space-y-2"
+                to={`/order/${order._id}`}
+                className="block bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 mb-2">
                   <img
                     src={order.orderItems[0].image}
                     alt={order.orderItems[0].name}
@@ -165,7 +174,7 @@ const MyOrdersPage = () => {
                 <div className="text-sm text-gray-600">
                   <strong>Total:</strong> ₹{order.totalPrice}
                 </div>
-                <div>
+                <div className="mt-1">
                   <span
                     className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
                       order.isPaid
@@ -176,7 +185,7 @@ const MyOrdersPage = () => {
                     {order.isPaid ? "Paid" : "Pending"}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </>
