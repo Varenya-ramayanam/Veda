@@ -9,12 +9,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "react-hot-toast";
 
 const initialProducts = [
-  { id: 1, name: "Printed Resort Shirt", price: 29.99, sku: "PRNT-RES-004" },
-  { id: 2, name: "Chino Pants", price: 55, sku: "BW-005" },
-  { id: 3, name: "Cargo Pants", price: 50, sku: "BW-008" },
+  { id: 1, name: "Printed Resort Shirt", price: 29.99, sku: "PRNT-RES-004", images: [] },
+  { id: 2, name: "Chino Pants", price: 55, sku: "BW-005", images: [] },
+  { id: 3, name: "Cargo Pants", price: 50, sku: "BW-008", images: [] },
 ];
 
 const ProductManagement = () => {
@@ -35,6 +36,15 @@ const ProductManagement = () => {
     setProducts((prev) => prev.filter((p) => p.id !== selectedProduct.id));
     toast.success(`${selectedProduct.name} deleted.`);
     setIsDeleteOpen(false);
+  };
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const imageUrls = files.map((file) => URL.createObjectURL(file));
+    setSelectedProduct((prev) => ({
+      ...prev,
+      images: [...(prev.images || []), ...imageUrls],
+    }));
   };
 
   return (
@@ -87,42 +97,81 @@ const ProductManagement = () => {
 
       {/* --- Edit Dialog --- */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-xl p-6 rounded-lg shadow-lg">
           <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-[#ea2e0e]">
+              Edit Product Details
+            </DialogTitle>
           </DialogHeader>
+
           {selectedProduct && (
-            <div className="space-y-4">
-              <Input
-                value={selectedProduct.name}
-                onChange={(e) =>
-                  setSelectedProduct({ ...selectedProduct, name: e.target.value })
-                }
-                placeholder="Product Name"
-              />
-              <Input
-                type="number"
-                value={selectedProduct.price}
-                onChange={(e) =>
-                  setSelectedProduct({ ...selectedProduct, price: +e.target.value })
-                }
-                placeholder="Price"
-              />
-              <Input
-                value={selectedProduct.sku}
-                onChange={(e) =>
-                  setSelectedProduct({ ...selectedProduct, sku: e.target.value })
-                }
-                placeholder="SKU"
-              />
+            <div className="space-y-5 mt-4">
+              <div>
+                <Label className="text-sm text-gray-700">Product Name</Label>
+                <Input
+                  value={selectedProduct.name}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, name: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="Enter product name"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-700">Price</Label>
+                <Input
+                  type="number"
+                  value={selectedProduct.price}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, price: +e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="Enter product price"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-700">SKU</Label>
+                <Input
+                  value={selectedProduct.sku}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, sku: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="Enter SKU code"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-700">Upload Images</Label>
+                <Input
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                {selectedProduct.images?.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt="product"
+                    className="w-20 h-20 object-cover border rounded-md shadow-sm"
+                  />
+                ))}
+              </div>
             </div>
           )}
-          <DialogFooter className="mt-4">
+
+          <DialogFooter className="mt-6 flex justify-between">
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
               Cancel
             </Button>
             <Button
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-[#ea2e0e] hover:bg-[#c62807] text-white"
               onClick={handleEdit}
             >
               Save Changes
@@ -133,16 +182,21 @@ const ProductManagement = () => {
 
       {/* --- Delete Confirmation Dialog --- */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md p-6 rounded-lg shadow-lg">
           <DialogHeader>
-            <DialogTitle>Delete Product</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-red-600">
+              Confirm Product Deletion
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-gray-600">
-            Are you sure you want to delete{" "}
-            <span className="font-semibold">{selectedProduct?.name}</span>? This
-            action cannot be undone.
+          <p className="text-sm text-gray-700 mt-3">
+            Are you sure you want to permanently remove{" "}
+            <span className="font-bold text-[#ea2e0e]">
+              {selectedProduct?.name}
+            </span>
+            ? This action cannot be undone.
           </p>
-          <DialogFooter className="mt-4">
+
+          <DialogFooter className="mt-6 flex justify-between">
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
               Cancel
             </Button>
@@ -150,7 +204,7 @@ const ProductManagement = () => {
               className="bg-red-600 hover:bg-red-700 text-white"
               onClick={confirmDelete}
             >
-              Confirm Delete
+              Yes, Delete
             </Button>
           </DialogFooter>
         </DialogContent>
