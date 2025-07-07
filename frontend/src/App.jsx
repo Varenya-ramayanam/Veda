@@ -13,6 +13,10 @@ import OrderConfirmationPage from "./components/Cart/OrderConfirmationPage";
 import OrderDetails from "./components/Cart/OrderDetails";
 import MyOrdersPage from "./pages/MyOrdersPage";
 
+import AdminLayout from "./components/Admin/AdminLayout";
+import AdminHomePage from "./pages/AdminHomePage";
+
+
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_reactiveId: true }}>
@@ -39,6 +43,10 @@ function App() {
           <Route path="order-confirmation" element={<OrderConfirmationPage />} />
           <Route path="order/:id" element={<OrderDetails/>} />
           <Route path = "/my-orders" element={<MyOrdersPage/>} />
+        </Route>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminHomePage/>} />
+
         </Route>
       </Routes>
     </BrowserRouter>

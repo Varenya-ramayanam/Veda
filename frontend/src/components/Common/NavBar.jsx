@@ -60,7 +60,11 @@ const NavBar = () => {
         </div>
 
         {/* Right: Icons */}
+
         <div className="flex items-center gap-5">
+          <Link to="/admin" className="block bg-black px-2 rounded text-sm text-white">
+            Admin
+          </Link>
           <Link to="/profile" className="hover:text-black">
             <HiOutlineUser className="h-6 w-6 text-gray-700" />
           </Link>
@@ -103,10 +107,34 @@ const NavBar = () => {
           </button>
         </div>
         <div className="flex flex-col gap-4 px-6 mt-4">
-          <Link to="/gifts" className="text-gray-700 text-sm font-medium" onClick={toggleNavDrawer}>Gifts</Link>
-          <Link to="/arts" className="text-gray-700 text-sm font-medium" onClick={toggleNavDrawer}>Arts</Link>
-          <Link to="/decor" className="text-gray-700 text-sm font-medium" onClick={toggleNavDrawer}>Handcrafted Decor</Link>
-          <Link to="/diy" className="text-gray-700 text-sm font-medium" onClick={toggleNavDrawer}>DIY & Craft Kits</Link>
+          <Link
+            to="/gifts"
+            className="text-gray-700 text-sm font-medium"
+            onClick={toggleNavDrawer}
+          >
+            Gifts
+          </Link>
+          <Link
+            to="/arts"
+            className="text-gray-700 text-sm font-medium"
+            onClick={toggleNavDrawer}
+          >
+            Arts
+          </Link>
+          <Link
+            to="/decor"
+            className="text-gray-700 text-sm font-medium"
+            onClick={toggleNavDrawer}
+          >
+            Handcrafted Decor
+          </Link>
+          <Link
+            to="/diy"
+            className="text-gray-700 text-sm font-medium"
+            onClick={toggleNavDrawer}
+          >
+            DIY & Craft Kits
+          </Link>
         </div>
       </div>
     </>
