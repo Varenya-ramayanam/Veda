@@ -6,7 +6,11 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
-} = require("../controllers/productController");
+  getProducts,
+  getSimilarProducts,
+  getBestSellers,
+  getNewArrivals,
+} = require("../controllers/productControllers");
 
 // Create
 router.post("/", protect, admin, createProduct);
