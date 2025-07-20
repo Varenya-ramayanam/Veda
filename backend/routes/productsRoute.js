@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { protect, admin } = require("../middleware/authMiddleware");
+const { protect, admin } = require("../middlewares/authMiddleware");
 const {
   createProduct,
   getProductById,
@@ -10,7 +10,7 @@ const {
   getSimilarProducts,
   getBestSellers,
   getNewArrivals,
-} = require("../controllers/productControllers");
+} = require("../controllers/productController");
 
 // Create
 router.post("/", protect, admin, createProduct);

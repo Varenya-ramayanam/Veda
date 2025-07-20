@@ -6,7 +6,7 @@ const {
     deleteProductFromCart,
     getUserCart,
     mergeCart
-} = require("../controllers/cartControllers");
+} = require("../controllers/cartController");
 const { protect } = require("../middlewares/authMiddleware");
 
 // @route   POST /api/cart
