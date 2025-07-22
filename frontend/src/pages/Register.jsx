@@ -1,18 +1,21 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../redux/slices/Authslice";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import LoginAnimation from "../components/Animations/LoginAnimation"; // Replace if needed
+import LoginAnimation from "../components/Animations/LoginAnimation";
 
 const Register = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name || !email || !password || !confirmPassword) {
@@ -25,11 +28,20 @@ const Register = () => {
       return;
     }
 
-    // Simulate successful registration
-    toast.success("Registration successful! Redirecting to login...", {
-      onClose: () => navigate("/login"),
-      autoClose: 2000,
-    });
+    try {
+      const result = await dispatch(register({ name, email, password }));
+      if (register.fulfilled.match(result)) {
+        toast.success("Registration successful! Redirecting to login...", {
+          autoClose: 2000,
+          onClose: () => navigate("/login"),
+        });
+      } else {
+        toast.error(result.payload?.message || "Registration failed");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.error("Registration error:", error);
+    }
   };
 
   return (

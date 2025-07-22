@@ -19,42 +19,47 @@ import UserManagement from "./components/Admin/components/UserManagement";
 import ProductManagement from "./components/Admin/components/ProductManagement";
 import OrderManagement from "./components/Admin/components/OrderManagement";
 
+import { Provider } from "react-redux";
+import store from "./redux/store";
+
 
 function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_reactiveId: true }}>
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            fontSize: "0.9rem",
-            padding: "12px 16px",
-          },
-        }}
-      />
-      <Routes>
-        <Route path="/" element={<UserLayout />}>
-          <Route index element={<Home />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="collections/:collection" element={<CollectionPage />} />
-          <Route path="product/:id" element={<ProductDetails />} />
-          <Route path="checkout" element={<Checkout />} />
-          <Route path="payment" element={<PaymentOptions />} />
-          <Route path="order-confirmation" element={<OrderConfirmationPage />} />
-          <Route path="order/:id" element={<OrderDetails/>} />
-          <Route path = "/my-orders" element={<MyOrdersPage/>} />
-        </Route>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminHomePage/>} />
-          <Route path="users" element={<UserManagement/>} />
-          <Route path="products" element={<ProductManagement/>} />
-          <Route path="orders" element={<OrderManagement/>} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter future={{ v7_startTransition: true, v7_reactiveId: true }}>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              fontSize: "0.9rem",
+              padding: "12px 16px",
+            },
+          }}
+        />
+        <Routes>
+          <Route path="/" element={<UserLayout />}>
+            <Route index element={<Home />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="collections/:collection" element={<CollectionPage />} />
+            <Route path="product/:id" element={<ProductDetails />} />
+            <Route path="checkout" element={<Checkout />} />
+            <Route path="payment" element={<PaymentOptions />} />
+            <Route path="order-confirmation" element={<OrderConfirmationPage />} />
+            <Route path="order/:id" element={<OrderDetails />} />
+            <Route path="/my-orders" element={<MyOrdersPage />} />
+          </Route>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminHomePage />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="products" element={<ProductManagement />} />
+            <Route path="orders" element={<OrderManagement />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </Provider>
   );
 }
 

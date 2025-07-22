@@ -1,23 +1,33 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LoginAnimation from "../components/Animations/LoginAnimation";
+import { useDispatch } from "react-redux";
+import { login } from "../redux/slices/Authslice";
+import { toast } from "react-hot-toast";
 
 const Login = () => {
 
   const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const handleLogin = (e) => {
+
+  const dispatch = useDispatch();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Logging in with:", { email, password });
-    navigate("/");
+    const result = await dispatch(login({ email, password }));
+    if (login.fulfilled.match(result)) {
+      navigate("/");
+    } else {
+      toast.error(result.payload?.message || "Login failed");
+    }
   };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white px-4">
       <div className="flex flex-col md:flex-row w-full max-w-6xl shadow-md rounded-xl overflow-hidden border border-gray-200">
-        
+
         {/* Left: Login Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-12">
           <form className="w-full max-w-md space-y-6">

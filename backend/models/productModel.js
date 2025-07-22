@@ -36,7 +36,7 @@ const productSchema = mongoose.Schema({
   },
   sizes: {
     type: [String],
-    // enum: ["S", "M", "L", "XL", "XXL"],
+    enum: ["S", "M", "L", "XL", "XXL"],
     required: true,
   },
   color: {
@@ -72,10 +72,10 @@ const productSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  isNew: {
+  isNewArrival: {
     type: Boolean,
     default: false,
-  },
+  },  
   isPublished: {
     type: Boolean,
     default: true,
@@ -93,11 +93,6 @@ const productSchema = mongoose.Schema({
   },
   reviews: [{}],
   tags: [String],
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
   metaTitle: {
     type: String,
   },
