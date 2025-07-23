@@ -1,40 +1,49 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
+const defaultFilter = {
+  category: [],
+  material: [],
+  collections: [],
+  color: [],
+  ratingMin: "",
+  ecoFriendly: false,
+  sort: "relevance",
+  priceMin: 0,
+  priceMax: 10000,
+};
+
 const FilterSidebar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [Filter, setFilter] = useState({
-    categories: searchParams.getAll("category") || [],
-    materials: searchParams.getAll("material") || [],
-    deities: searchParams.getAll("deity") || [],
-    availability: searchParams.getAll("availability") || [],
-    rating: searchParams.get("rating") || "",
+    category: searchParams.getAll("category") || [],
+    material: searchParams.getAll("material") || [],
+    collections: searchParams.getAll("collections") || [],
+    color: searchParams.getAll("color") || [],
+    ratingMin: searchParams.get("ratingMin") || "",
     ecoFriendly: searchParams.get("ecoFriendly") === "true",
-    sortBy: searchParams.get("sortBy") || "relevance",
-    minPrice: parseInt(searchParams.get("minPrice")) || 0,
-    maxPrice: parseInt(searchParams.get("maxPrice")) || 10000,
+    sort: searchParams.get("sort") || "relevance",
+    priceMin: parseInt(searchParams.get("priceMin")) || 0,
+    priceMax: parseInt(searchParams.get("priceMax")) || 10000,
   });
 
-  const categories = ["Gifts", "Arts", "Handcrafted Decor", "DIY & Craft Kits"];
+
   const materials = ["Wood", "Brass", "Terracotta", "Eco-friendly Materials", "Metal"];
-  const deities = ["Ganesha", "Lakshmi", "Hanuman", "Krishna", "Rama"];
-  const availabilities = ["inStock", "preOrder"];
+  const colors = ["Brown", "Terracotta", "Multicolor", "Black", "White"];
+  const collections = ["Arts", "Gifts", "Home Decor", "DIY"];
   const ratings = [5, 4, 3, 2, 1];
 
-
-  // Sync filters to URL
   useEffect(() => {
     const params = new URLSearchParams();
-    Filter.categories.forEach((c) => params.append("category", c));
-    Filter.materials.forEach((m) => params.append("material", m));
-    Filter.deities.forEach((d) => params.append("deity", d));
-    Filter.availability.forEach((a) => params.append("availability", a));
-    if (Filter.rating) params.set("rating", Filter.rating);
+    Filter.material.forEach((m) => params.append("material", m));
+    Filter.collections.forEach((col) => params.append("collections", col));
+    Filter.color.forEach((clr) => params.append("color", clr));
+    if (Filter.ratingMin) params.set("ratingMin", Filter.ratingMin);
     if (Filter.ecoFriendly) params.set("ecoFriendly", "true");
-    params.set("minPrice", Filter.minPrice);
-    params.set("maxPrice", Filter.maxPrice);
-    params.set("sortBy", Filter.sortBy);
+    params.set("priceMin", Filter.priceMin);
+    params.set("priceMax", Filter.priceMax);
+    params.set("sort", Filter.sort);
     setSearchParams(params);
   }, [Filter]);
 
@@ -49,7 +58,7 @@ const FilterSidebar = () => {
   };
 
   const handleRatingChange = (e) => {
-    setFilter((prev) => ({ ...prev, rating: e.target.value }));
+    setFilter((prev) => ({ ...prev, ratingMin: e.target.value }));
   };
 
   const handleEcoToggle = () => {
@@ -65,16 +74,7 @@ const FilterSidebar = () => {
   };
 
   const resetFilters = () => {
-    setFilter({
-      categories: [],
-      materials: [],
-      deities: [],
-      availability: [],
-      rating: "",
-      ecoFriendly: false,
-      minPrice: 0,
-      maxPrice: 10000,
-    });
+    setFilter(defaultFilter);
     setSearchParams({});
   };
 
@@ -82,21 +82,22 @@ const FilterSidebar = () => {
     <div className="space-y-6 h-full overflow-y-auto pr-2 text-sm">
       <h2 className="text-xl font-semibold text-indigo-700 mb-3">Filters</h2>
 
-      {/* CATEGORY */}
+      {/* COLLECTIONS */}
       <div className="border-b pb-3">
-        <p className="font-medium mb-2">Category</p>
-        {categories.map((c) => (
-          <label key={c} className="block">
+        <p className="font-medium mb-2">Collections</p>
+        {collections.map((col) => (
+          <label key={col} className="block">
             <input
               type="checkbox"
-              checked={Filter.categories.includes(c)}
-              onChange={() => toggleCheckbox("categories", c)}
+              checked={Filter.collections.includes(col)}
+              onChange={() => toggleCheckbox("collections", col)}
               className="mr-2"
             />
-            {c}
+            {col}
           </label>
         ))}
       </div>
+
 
       {/* MATERIAL */}
       <div className="border-b pb-3">
@@ -105,8 +106,8 @@ const FilterSidebar = () => {
           <label key={m} className="block">
             <input
               type="checkbox"
-              checked={Filter.materials.includes(m)}
-              onChange={() => toggleCheckbox("materials", m)}
+              checked={Filter.material.includes(m)}
+              onChange={() => toggleCheckbox("material", m)}
               className="mr-2"
             />
             {m}
@@ -114,34 +115,18 @@ const FilterSidebar = () => {
         ))}
       </div>
 
-      {/* DEITY */}
+      {/* COLOR */}
       <div className="border-b pb-3">
-        <p className="font-medium mb-2">Deity</p>
-        {deities.map((d) => (
-          <label key={d} className="block">
+        <p className="font-medium mb-2">Color</p>
+        {colors.map((clr) => (
+          <label key={clr} className="block">
             <input
               type="checkbox"
-              checked={Filter.deities.includes(d)}
-              onChange={() => toggleCheckbox("deities", d)}
+              checked={Filter.color.includes(clr)}
+              onChange={() => toggleCheckbox("color", clr)}
               className="mr-2"
             />
-            {d}
-          </label>
-        ))}
-      </div>
-
-      {/* AVAILABILITY */}
-      <div className="border-b pb-3">
-        <p className="font-medium mb-2">Availability</p>
-        {availabilities.map((a) => (
-          <label key={a} className="block">
-            <input
-              type="checkbox"
-              checked={Filter.availability.includes(a)}
-              onChange={() => toggleCheckbox("availability", a)}
-              className="mr-2"
-            />
-            {a === "inStock" ? "In Stock" : "Pre-order"}
+            {clr}
           </label>
         ))}
       </div>
@@ -150,7 +135,7 @@ const FilterSidebar = () => {
       <div className="border-b pb-3">
         <label className="block font-medium mb-2">Minimum Rating</label>
         <select
-          value={Filter.rating}
+          value={Filter.ratingMin}
           onChange={handleRatingChange}
           className="w-full border p-2 rounded"
         >
@@ -182,23 +167,21 @@ const FilterSidebar = () => {
           <input
             type="number"
             min="0"
-            value={Filter.minPrice}
-            onChange={(e) => handlePriceChange(e, "minPrice")}
+            value={Filter.priceMin}
+            onChange={(e) => handlePriceChange(e, "priceMin")}
             className="w-1/2 border p-1 rounded"
             placeholder="Min"
           />
           <input
             type="number"
             min="0"
-            value={Filter.maxPrice}
-            onChange={(e) => handlePriceChange(e, "maxPrice")}
+            value={Filter.priceMax}
+            onChange={(e) => handlePriceChange(e, "priceMax")}
             className="w-1/2 border p-1 rounded"
             placeholder="Max"
           />
         </div>
       </div>
-
-      
 
       {/* RESET BUTTON */}
       <div className="pt-2">

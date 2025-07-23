@@ -1,13 +1,15 @@
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+// seed.js
+const dotenv = require('dotenv');
+const path = require('path');
 
-// 1️⃣ Load .env BEFORE importing connectDB
-dotenv.config();
+// 1. Load environment variables first.
+//    Ensure .env is in the project root relative to where you run node seed.js
+dotenv.config({ path: path.resolve(__dirname, '../.env') }); 
 
-const connectDB = require("../config/db"); // Now this can use MONGO_URI
-connectDB(); // ✅ Connects to MongoDB with env var loaded
+const mongoose = require("mongoose"); // Mongoose is needed for Product model and connectDB
+const connectDB = require("../config/db"); // Your DB connection function
 
-const Product = require("../models/productModel");
+const Product = require("../models/productModel"); // Your Product Model
 
 const products = [
   {
@@ -18,7 +20,6 @@ const products = [
     stock: 15,
     sku: "TERR-LAKSHMI-01",
     category: "Pooja Items",
-    sizes: ["S", "M"],
     color: "Terracotta",
     collections: "Gifts",
     image: [
@@ -40,34 +41,6 @@ const products = [
     material: "Terracotta"
   },
   {
-    name: "Eco-Friendly Ganesh Idol",
-    description: "Made with eco-friendly clay, this idol is perfect for Ganesh Chaturthi celebrations.",
-    price: 799,
-    stock: 30,
-    sku: "GANESH-ECO-02",
-    category: "Idols",
-    sizes: ["M", "L"],
-    color: "Brown",
-    collections: "DIY",
-    image: [
-      {
-        url: "https://picsum.photos/seed/ganesh/400/500",
-        altText: "Eco-friendly Ganesh Idol"
-      }
-    ],
-    isFeatured: false,
-    isNewArrival: true,
-    isPublished: true,
-    isDeleted: false,
-    rating: 4.5,
-    numReviews: 8,
-    reviews: [],
-    tags: ["ganesh", "eco", "idol", "clay"],
-    dimensions: { length: 15, width: 12, height: 20 },
-    weight: 1.2,
-    material: "Clay"
-  },
-  {
     name: "Wooden Krishna Wall Art",
     description: "Beautifully carved wall hanging of Lord Krishna playing the flute.",
     price: 1599,
@@ -75,7 +48,6 @@ const products = [
     stock: 10,
     sku: "KRISHNA-WOOD-03",
     category: "Wall Art",
-    sizes: ["L"],
     color: "Brown",
     collections: "Arts",
     image: [
@@ -103,7 +75,6 @@ const products = [
     stock: 40,
     sku: "RANGOLI-KIT-04",
     category: "DIY Kits",
-    sizes: ["S"],
     color: "Multicolor",
     collections: "DIY",
     image: [
@@ -125,20 +96,30 @@ const products = [
     material: "Powder, Plastic"
   }
 ];
-
-
 const seedProducts = async () => {
   try {
+    // 2. Await the database connection before any DB operations
+    await connectDB(); 
+    console.log("MongoDB Connection established for seeding.");
+
     console.log("Seeding products...");
     await Product.deleteMany({});
     const inserted = await Product.insertMany(products);
-    console.log("✅ Products seeded successfully:", inserted.length);
-    process.exit();
+    console.log(`✅ Products seeded successfully: ${inserted.length} items.`);
+    process.exit(0); // Exit with success code
   } catch (error) {
     console.error("❌ Error seeding data:", error.message);
-    console.dir(error, { depth: null });
-    process.exit(1);
+    // console.dir(error, { depth: null }); // Uncomment for very detailed error
+    process.exit(1); // Exit with failure code
+  } finally {
+    // Optional: Close the Mongoose connection after seeding is done
+    // This is good practice for short-lived scripts like seeders.
+    if (mongoose.connection.readyState === 1) { // Check if connected
+        await mongoose.disconnect();
+        console.log("MongoDB Connection closed after seeding.");
+    }
   }
 };
 
+// Call the async seeding function
 seedProducts();

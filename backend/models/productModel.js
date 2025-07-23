@@ -1,134 +1,125 @@
 const mongoose = require("mongoose");
 
-const productSchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  discountPrice: {
-    type: Number,
-  },
-  stock: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-  sku: {
-    type: String,
-    required: true,
-    unique: true,
-    uppercase: true,
-    index: true,
-    default: "sku",
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-  sizes: {
-    type: [String],
-    enum: ["S", "M", "L", "XL", "XXL"],
-    required: true,
-  },
-  color: {
-    type: String,
-    required: true,
-  },
-  ratings: {
-    type: Number,
-    default: 0,
-  },
-  numReviews: {
-    type: Number,
-    default: 0,
-  },
-  collections: {
-    type: String,
-    required: true,
-    enum: ["Arts", "Gifts", "Home Decor", "DIY"],
-    message: "Please select the correct collection",
-  },
-  image: [
-    {
-      url: {
-        type: String,
-        required: true,
+const productSchema = mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    discountPrice: {
+      type: Number,
+    },
+    stock: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    stockAvailability: {
+      type: String,
+      enum: ["inStock", "preOrder", "outOfStock"],
+      default: "inStock",
+    },
+    sku: {
+      type: String,
+      required: true,
+      unique: true,
+      uppercase: true,
+      index: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    collections: {
+      type: String,
+      required: true,
+      enum: ["Arts", "Gifts", "Home Decor", "DIY"],
+    },
+    material: {
+      type: String,
+      required: true,
+    },
+    color: {
+      type: String,
+      required: true,
+    },
+    image: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+        altText: {
+          type: String,
+        },
       },
-      altText: {
-        type: String,
+    ],
+    rating: {
+      type: Number,
+      default: 0,
+    },
+    numReviews: {
+      type: Number,
+      default: 0,
+    },
+    reviews: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        name: String,
+        rating: Number,
+        comment: String,
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
+    ],
+    isFeatured: {
+      type: Boolean,
+      default: false,
     },
-  ],
-  isFeatured: {
-    type: Boolean,
-    default: false,
-  },
-  isNewArrival: {
-    type: Boolean,
-    default: false,
-  },  
-  isPublished: {
-    type: Boolean,
-    default: true,
-  },
-  isDeleted: {
-    type: Boolean,
-  },
-  rating: {
-    type: Number,
-    default: 0,
-  },
-  numReviews: {
-    type: Number,
-    default: 0,
-  },
-  reviews: [{}],
-  tags: [String],
-  metaTitle: {
-    type: String,
-  },
-  metaDescription: {
-    type: String,
-  },
-  metaKeywords: {
-    type: String,
-  },
-  metaImage: {
-    type: String,
-  },
-  metaUrl: {
-    type: String,
-  },
-  dimensions:{
-    length: {
-      type: Number,
+    isNewArrival: {
+      type: Boolean,
+      default: false,
     },
-    width: {
-      type: Number,
+    ecoFriendly: {
+      type: Boolean,
+      default: false,
     },
-    height: {
-      type: Number,
+    isPublished: {
+      type: Boolean,
+      default: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    tags: [String],
+    metaTitle: String,
+    metaDescription: String,
+    metaKeywords: String,
+    metaImage: String,
+    metaUrl: String,
+    dimensions: {
+      length: Number,
+      width: Number,
+      height: Number,
+    },
+    weight: Number,
   },
-  weight: {
-    type: Number,
-  },
-  material: {
-    type: String,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("Product", productSchema);
