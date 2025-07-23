@@ -12,7 +12,7 @@ const {
 // @route   GET /api/orders
 // @desc    Get all orders for the logged-in user
 // @access  Private
-router.get("/", protect, getUserOrders);
+router.get("/my-orders", protect, getUserOrders);
 
 // @route   GET /api/orders/:id
 // @desc    Get a specific order by ID for the logged-in user

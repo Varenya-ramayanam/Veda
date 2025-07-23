@@ -12,7 +12,7 @@ const findCart = async (userId, guestId) => {
 };
 
 const addProductToCart = async (req, res) => {
-    const { productId, quantity, size, color, guestId, userId } = req.body;
+    const { productId, quantity, color, guestId, userId } = req.body;
     try {
         const product = await Product.findById(productId);
         if (!product) return res.status(404).json({ message: "Product not found" });
@@ -22,19 +22,19 @@ const addProductToCart = async (req, res) => {
         if (cart) {
             const cartItemIndex = cart.products.findIndex(
                 item => item.productId.toString() === productId.toString() &&
-                        item.size === size && item.color === color
+                         item.color === color
             );
 
             if (cartItemIndex !== -1) {
                 cart.products[cartItemIndex].quantity += quantity;
             } else {
-                cart.products.push({ productId, name: product.name, price: product.price, quantity, size, color });
+                cart.products.push({ productId, name: product.name, price: product.price, quantity, color });
             }
         } else {
             cart = new Cart({
                 userId,
                 guestId,
-                products: [{ productId, name: product.name, price: product.price, quantity, size, color }]
+                products: [{ productId, name: product.name, price: product.price, quantity, color }]
             });
         }
 
@@ -49,14 +49,14 @@ const addProductToCart = async (req, res) => {
 };
 
 const updateProductQuantity = async (req, res) => {
-    const { productId, quantity, size, color, guestId, userId } = req.body;
+    const { productId, quantity,  color, guestId, userId } = req.body;
     try {
         const cart = await findCart(userId, guestId);
         if (!cart) return res.status(404).json({ message: "Cart not found" });
 
         const cartItemIndex = cart.products.findIndex(
             item => item.productId.toString() === productId.toString() &&
-                    item.size === size && item.color === color
+                     item.color === color
         );
 
         if (cartItemIndex !== -1) {
@@ -74,14 +74,14 @@ const updateProductQuantity = async (req, res) => {
 };
 
 const deleteProductFromCart = async (req, res) => {
-    const { productId, size, color, guestId, userId } = req.body;
+    const { productId, color, guestId, userId } = req.body;
     try {
         const cart = await findCart(userId, guestId);
         if (!cart) return res.status(404).json({ message: "Cart not found" });
 
         const cartItemIndex = cart.products.findIndex(
             item => item.productId.toString() === productId.toString() &&
-                    item.size === size && item.color === color
+                     item.color === color
         );
 
         if (cartItemIndex !== -1) {
@@ -124,7 +124,7 @@ const mergeCart = async (req, res) => {
             guestCart.products.forEach(item => {
                 const existing = userCart.products.find(
                     userItem => userItem.productId.toString() === item.productId.toString() &&
-                                userItem.size === item.size && userItem.color === item.color
+                                 userItem.color === item.color
                 );
                 if (existing) {
                     existing.quantity += item.quantity;
