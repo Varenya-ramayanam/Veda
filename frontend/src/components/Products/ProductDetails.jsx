@@ -2,75 +2,14 @@ import { useState } from "react";
 import { toast } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 import ProductGrid from "./ProductGrid";
-
-const selectedProduct = {
-  name: "Abstract Canvas Painting",
-  price: 1000,
-  originalPrice: 1500,
-  description:
-    "A beautiful hand-painted abstract artwork on premium canvas. Perfect for enhancing home interiors or gifting loved ones.",
-  material: "Canvas Sheet",
-  brand: "Veda Arts",
-  dimensions: ["18x24 inches", "24x36 inches", "30x40 inches"],
-  images: [
-    { url: "https://picsum.photos/400/500?random=11", alt: "Abstract Painting 1" },
-    { url: "https://picsum.photos/400/500?random=12", alt: "Abstract Painting 2" },
-    { url: "https://picsum.photos/400/500?random=13", alt: "Abstract Painting 3" },
-  ],
-};
-
-
-const similarProducts = [
-  {
-    _id: "1",
-    name: "Modern Art Canvas",
-    price: 1200,
-    images: [
-      { url: "https://picsum.photos/400/500?random=21",
-        alt: "Modern Art 1" },
-      
-    ],
-
-  },
-  {
-    _id: "2",
-    name: "Modern Art Canvas",
-    price: 1200,
-    images: [
-      { url: "https://picsum.photos/400/500?random=22",
-        alt: "Modern Art 1" },
-      
-    ],
-    
-  },
-  {
-    _id: "3",
-    name: "Modern Art Canvas",
-    price: 1200,
-    images: [
-      { url: "https://picsum.photos/400/500?random=23",
-        alt: "Modern Art 1" },
-      
-    ],
-    
-  },
-  {
-    _id: "4",
-    name: "Modern Art Canvas",
-    price: 1200,
-    images: [
-      { url: "https://picsum.photos/400/500?random=24",
-        alt: "Modern Art 1" },
-      
-    ],
-    
-  },
-]
+import { useSelector } from "react-redux";
 
 const ProductDetails = () => {
-  const [selectedImage, setSelectedImage] = useState(selectedProduct.images[0].url);
+  const product = useSelector((state) => state.products?.product);
+
+  const [selectedImage, setSelectedImage] = useState(product?.image?.[0]?.url || "");
   const [quantity, setQuantity] = useState(1);
-  const [selectedDimension, setSelectedDimension] = useState(selectedProduct.dimensions[0]);
+  const [selectedDimension, setSelectedDimension] = useState(product?.dimensions?.[0] || "");
 
   const handleAddToCart = () => {
     if (!selectedDimension || quantity < 1) {
@@ -80,27 +19,39 @@ const ProductDetails = () => {
     }
   };
 
+  if (!product) return <div className="text-center py-10">No product found.</div>;
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 w-full lg:w-11/12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start min-h-[600px]">
         {/* Left Image Section */}
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex lg:flex-col gap-4 justify-center">
-            {selectedProduct.images.map((image, index) => (
+            {product.image?.map((img, index) => (
               <img
                 key={index}
-                src={image.url}
-                alt={image.alt}
-                onClick={() => setSelectedImage(image.url)}
+                src={
+                  img?.url
+                    ? img.url.startsWith("http")
+                      ? img.url
+                      : `${import.meta.env.VITE_BACKEND_URL}${img.url}`
+                    : "https://via.placeholder.com/100x120?text=No+Image"
+                }
+                alt={img?.altText || product.name}
+                onClick={() => setSelectedImage(img.url)}
                 className={`w-16 h-20 md:w-20 md:h-24 object-cover rounded-md cursor-pointer border-2 transition duration-200 ${
-                  selectedImage === image.url ? "border-black" : "border-gray-300"
+                  selectedImage === img.url ? "border-black" : "border-gray-300"
                 }`}
               />
             ))}
           </div>
           <div className="flex-1">
             <img
-              src={selectedImage}
+              src={
+                selectedImage?.startsWith("http")
+                  ? selectedImage
+                  : `${import.meta.env.VITE_BACKEND_URL}${selectedImage}`
+              }
               alt="Selected Painting"
               className="w-full h-auto max-h-[600px] object-cover rounded-lg shadow-lg"
             />
@@ -111,27 +62,29 @@ const ProductDetails = () => {
         <div className="space-y-6 min-h-[600px] flex flex-col justify-between">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              {selectedProduct.name}
+              {product.name}
             </h1>
             <div className="flex items-center gap-4 justify-center">
               <span className="text-2xl md:text-3xl font-semibold text-red-600">
-                ₹{selectedProduct.price}
+                ₹{product.price}
               </span>
-              <span className="text-lg md:text-xl line-through text-gray-400">
-                ₹{selectedProduct.originalPrice}
-              </span>
+              {product.originalPrice && (
+                <span className="text-lg md:text-xl line-through text-gray-400">
+                  ₹{product.originalPrice}
+                </span>
+              )}
             </div>
 
             <p className="text-gray-700 text-base md:text-lg leading-relaxed mt-4">
-              {selectedProduct.description}
+              {product.description}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 mt-4">
               <div>
-                <span className="font-semibold">Material:</span> {selectedProduct.material}
+                <span className="font-semibold">Material:</span> {product.material}
               </div>
               <div>
-                <span className="font-semibold">Brand:</span> {selectedProduct.brand}
+                <span className="font-semibold">Brand:</span> {product.brand}
               </div>
               <div>
                 <span className="font-semibold">Dimensions:</span> {selectedDimension}
@@ -141,7 +94,7 @@ const ProductDetails = () => {
             <div className="mt-4">
               <label className="block mb-1 font-medium text-gray-800 text-sm">Select Dimensions:</label>
               <div className="flex flex-wrap gap-2">
-                {selectedProduct.dimensions.map((dim, index) => (
+                {product.dimensions?.map((dim, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedDimension(dim)}
@@ -184,14 +137,7 @@ const ProductDetails = () => {
             Add to Cart
           </button>
         </div>
-        
       </div>
-      <div className="mt-20 ">
-          <h2 className="text-2xl text-center font-medium mb-4">
-                You May also like
-          </h2>
-          <ProductGrid products={similarProducts}/>
-        </div>
     </div>
   );
 };

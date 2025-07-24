@@ -1,54 +1,17 @@
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { useRef } from "react";
-
+import { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "../../redux/slices/productSlice"; // Adjust path as needed
 
 const NewArrivals = () => {
   const scrollRef = useRef(null);
+  const dispatch = useDispatch();
 
-  const newArrivals = [
-    {
-      id: "1",
-      name: "Handmade Mug",
-      price: 300,
-      images: [{ url: "https://picsum.photos/300/300?random=1", alt: "mug" }],
-    },
-    {
-      id: "2",
-      name: "Custom Frame",
-      price: 450,
-      images: [{ url: "https://picsum.photos/300/300?random=2", alt: "frame" }],
-    },
-    {
-      id: "3",
-      name: "Decor Lamp",
-      price: 500,
-      images: [{ url: "https://picsum.photos/300/300?random=3", alt: "lamp" }],
-    },
-    {
-      id: "4",
-      name: "Painting",
-      price: 1200,
-      images: [{ url: "https://picsum.photos/300/300?random=4", alt: "art" }],
-    },
-    {
-      id: "5",
-      name: "Jewelry Box",
-      price: 350,
-      images: [{ url: "https://picsum.photos/300/300?random=5", alt: "box" }],
-    },
-    {
-      id: "6",
-      name: "Jewelry Box",
-      price: 360,
-      images: [{ url: "https://picsum.photos/300/300?random=6", alt: "box" }],
-    },
-    {
-      id: "7",
-      name: "Jewelry Box",
-      price: 370,
-      images: [{ url: "https://picsum.photos/300/300?random=7", alt: "box" }],
-    },
-  ];
+  const { products, loading, error } = useSelector((state) => state.products);
+
+  useEffect(() => {
+    dispatch(fetchProducts({ isNewArrival: true, limit: 10 }));
+  }, [dispatch]);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -85,35 +48,42 @@ const NewArrivals = () => {
         </button>
       </div>
 
-      {/* Scrollable Product Cards */}
+      {/* Product Cards */}
       <div
         ref={scrollRef}
         className="flex space-x-6 overflow-x-auto px-6 no-scrollbar"
       >
-        {newArrivals.map((product) => (
-          <div
-            key={product.id}
-            className="relative min-w-[260px] h-72 rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition duration-300 group"
-          >
-            <img
-              src={product.images[0]?.url}
-              alt={product.images[0]?.alt || product.name}
-              className="w-full h-full object-cover"
-            />
-            {/* Glassy Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-opacity flex flex-col justify-end p-5">
-              <h3 className="text-white text-xl font-semibold mb-1 drop-shadow opacity-90">
-                {product.name}
-              </h3>
-              <p className="text-white text-sm font-medium opacity-75">
-                ₹{product.price}
-              </p>
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p className="text-red-500">Error: {error}</p>
+        ) : products.length === 0 ? (
+          <p>No new arrivals found.</p>
+        ) : (
+          products.map((product) => (
+            <div
+              key={product._id}
+              className="relative min-w-[260px] h-72 rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition duration-300 group"
+            >
+              <img
+                    src={product.image?.[0]?.url}
+                    alt={product.image?.[0]?.altText || product.name}
+                    className="w-full h-60 sm:h-64 object-cover"
+                  />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-opacity flex flex-col justify-end p-5">
+                <h3 className="text-white text-xl font-semibold mb-1 drop-shadow opacity-90">
+                  {product.name}
+                </h3>
+                <p className="text-white text-sm font-medium opacity-75">
+                  ₹{product.price}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </section>
   );
-};
+}; 
 
 export default NewArrivals;

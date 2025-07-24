@@ -8,7 +8,7 @@ import { Link, useSearchParams } from "react-router-dom";
 
 const CollectionPage = () => {
   const dispatch = useDispatch();
-  const { products, loading } = useSelector((state) => state.product);
+  const { products, loading } = useSelector((state) => state.products);
   const [searchParams] = useSearchParams();
 
   const sidebarRef = useRef(null);
