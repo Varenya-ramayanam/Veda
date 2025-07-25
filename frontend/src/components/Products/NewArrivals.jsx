@@ -1,7 +1,8 @@
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "../../redux/slices/productSlice"; // Adjust path as needed
+import { fetchProducts } from "../../redux/slices/productSlice";
+import { Link } from "react-router-dom"; // ✅ import Link
 
 const NewArrivals = () => {
   const scrollRef = useRef(null);
@@ -61,15 +62,20 @@ const NewArrivals = () => {
           <p>No new arrivals found.</p>
         ) : (
           products.map((product) => (
-            <div
+            <Link
+              to={`/product/${product._id}`} // ✅ navigate to product details
               key={product._id}
               className="relative min-w-[260px] h-72 rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition duration-300 group"
             >
               <img
-                    src={product.image?.[0]?.url}
-                    alt={product.image?.[0]?.altText || product.name}
-                    className="w-full h-60 sm:h-64 object-cover"
-                  />
+                src={
+                  product.image?.[0]?.url?.startsWith("http")
+                    ? product.image[0].url
+                    : `${import.meta.env.VITE_BACKEND_URL}${product.image?.[0]?.url}`
+                }
+                alt={product.image?.[0]?.altText || product.name}
+                className="w-full h-60 sm:h-64 object-cover"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-opacity flex flex-col justify-end p-5">
                 <h3 className="text-white text-xl font-semibold mb-1 drop-shadow opacity-90">
                   {product.name}
@@ -78,12 +84,12 @@ const NewArrivals = () => {
                   ₹{product.price}
                 </p>
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>
     </section>
   );
-}; 
+};
 
 export default NewArrivals;

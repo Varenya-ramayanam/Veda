@@ -3,9 +3,18 @@ import axios from "axios";
 
 // Load cart from localStorage
 const loadCartFromStorage = () => {
-  const cart = localStorage.getItem("cart");
-  return cart ? JSON.parse(cart) : { products: [], totalPrice: 0, totalQuantity: 0 };
+  try {
+    const cart = localStorage.getItem("cart");
+    if (!cart || cart === "undefined" || cart === "null") {
+      return { products: [], totalPrice: 0, totalQuantity: 0 };
+    }
+    return JSON.parse(cart);
+  } catch (e) {
+    console.error("Failed to parse cart from storage", e);
+    return { products: [], totalPrice: 0, totalQuantity: 0 };
+  }
 };
+
 
 // Save cart to localStorage
 const saveCartToStorage = (cart) => {

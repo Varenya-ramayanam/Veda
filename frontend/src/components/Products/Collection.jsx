@@ -16,7 +16,7 @@ const Collection = () => {
           <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-sm p-6 rounded">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Gifts Collection</h2>
             <Link
-              to="/collections/all?type=gifts"
+              to="collections/all?collections=Gifts&priceMin=0&priceMax=10000&sort=relevance"
               className="text-gray-900 underline hover:text-gray-700 transition"
             >
               Shop now
@@ -34,7 +34,7 @@ const Collection = () => {
           <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-sm p-6 rounded">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Arts Collection</h2>
             <Link
-              to="/collections/all?type=arts"
+              to="collections/all?collections=Arts&priceMin=0&priceMax=10000&sort=relevance"
               className="text-gray-900 underline hover:text-gray-700 transition"
             >
               Shop now

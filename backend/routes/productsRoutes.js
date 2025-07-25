@@ -16,7 +16,7 @@ const {
 router.post("/", protect, admin, createProduct);
 
 // Read
-router.get("/:id", protect, admin, getProductById);
+router.get("/:id", getProductById);
 
 // Update
 router.put("/:id", protect, admin, updateProduct);

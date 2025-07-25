@@ -1,12 +1,22 @@
 import { IoMdClose } from "react-icons/io";
 import CartContents from "../../Cart/CartContents";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
   const navigate = useNavigate();
+  const { user, guestId } = useSelector((state) => state.auth);
+  const { cart } = useSelector((state) => state.cart);
+  const userId = user ? user.id : null;
+
+  
   const handleCheckout = () => {
-    navigate("/checkout");
     toggleCartDrawer();
+    if (!userId) {
+      navigate(`/login?redirect=checkout`);
+    } else {
+      navigate("/checkout");
+    }
   };
 
   return (
@@ -23,22 +33,27 @@ const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
       {/* cart Contents with Scrollable Area  */}
       <div className="flex-grow p-4 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Your Cart</h2>
-        {/* Componet for Cart Content  */}
-        <div>
-          <CartContents />
-        </div>
+        {cart && cart?.products?.length > 0 ? (
+          <CartContents cart={cart} userId={userId} guestId={guestId} />
+        ) : (
+          <p className="text-center text-gray-500">Your cart is empty.</p>
+        )}
         {/* Checkout Button  */}
-        <div
-          className="p-4 bg-white fixed bottom-0 left-0 w-full z-10 shadow-t"
-          onClick={handleCheckout}
-        >
-          <button className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
-            Checkout
-          </button>
-          <p className="text-sm tracking-tighter text-gray-500 mt-2 text-center">
-            Shipping, taxes, and discount codes calculated at checkout.
-          </p>
-        </div>
+        {cart && cart?.products?.length > 0 && (
+          <>
+            <div
+              className="p-4 bg-white fixed bottom-0 left-0 w-full z-10 shadow-t"
+              onClick={handleCheckout}
+            >
+              <button className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
+                Checkout
+              </button>
+              <p className="text-sm tracking-tighter text-gray-500 mt-2 text-center">
+                Shipping, taxes, and discount codes calculated at checkout.
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -63,7 +63,7 @@ const createProduct = async (req, res) => {
 
 // @desc    Get a product by ID
 // @route   GET /api/products/:id
-// @access  Private/Admin
+// @access  Public
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

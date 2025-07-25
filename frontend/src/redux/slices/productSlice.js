@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Async Thunk: Fetch products with filters
+// ✅ Fetch products with filters
 export const fetchProducts = createAsyncThunk(
   "products/fetchByFilters",
   async ({
@@ -28,9 +28,7 @@ export const fetchProducts = createAsyncThunk(
     if (collections) query.append("collections", collections);
     if (category) query.append("category", category);
     if (material) query.append("material", material);
-    if (sizes && sizes.length > 0) {
-      sizes.forEach((size) => query.append("sizes", size));
-    }
+    if (sizes?.length) sizes.forEach((size) => query.append("sizes", size));
     if (color) query.append("color", color);
     if (priceMin !== undefined) query.append("priceMin", priceMin);
     if (priceMax !== undefined) query.append("priceMax", priceMax);
@@ -42,53 +40,77 @@ export const fetchProducts = createAsyncThunk(
     if (search) query.append("search", search);
     if (page !== undefined) query.append("page", page);
     if (limit !== undefined) query.append("limit", limit);
-    if (tags && tags.length > 0) {
-      tags.forEach((tag) => query.append("tags", tag));
-    }
-    if (stockAvailability) query.append("stockAvailability", stockAvailability);
+    if (tags?.length) tags.forEach((tag) => query.append("tags", tag));
+    if (stockAvailability)
+      query.append("stockAvailability", stockAvailability);
 
     const response = await axios.get(
       `${import.meta.env.VITE_BACKEND_URL}/api/products?${query.toString()}`
     );
 
-    // Expecting { products: [...], total: number, page: number }
-    return response.data;
+    return response.data; // { products, total, page }
   }
 );
 
-// Async Thunk: Fetch single product details
+// ✅ Fetch single product details
 export const fetchProductDetails = createAsyncThunk(
   "products/fetchProductDetails",
   async (id) => {
+    const token = localStorage.getItem("userToken");
+    const config = token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : {};
+
     const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URL}/api/products/${id}`
+      `${import.meta.env.VITE_BACKEND_URL}/api/products/${id}`,
+      config
     );
     return response.data;
   }
 );
 
-// Initial State
+// ✅ Fetch similar products
+export const fetchSimilarProducts = createAsyncThunk(
+  "products/fetchSimilarProducts",
+  async ({ id }) => {
+    const token = localStorage.getItem("userToken");
+    const config = token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : {};
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/products/similar/${id}`,
+      config
+    );
+    return { products: response.data || [] };
+  }
+);
+
+// ✅ Initial State
 const initialState = {
   products: [],
-  product: null,
+  selectedProduct: null,
   total: 0,
   page: 1,
   loading: false,
   error: null,
+  similarProducts: [],
+  similarLoading: false,
 };
 
-// Slice
+// ✅ Slice
 const productSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
     clearProduct(state) {
-      state.product = null;
+      state.selectedProduct = null;
+      state.similarProducts = [];
     },
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all products
+      // ✅ All Products
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -101,22 +123,36 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
-        state.products = []; // fallback to empty
+        state.error = action.error.message || "Failed to fetch products";
+        state.products = [];
       })
 
-      // Fetch single product
+      // ✅ Single Product
       .addCase(fetchProductDetails.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.selectedProduct = null;
       })
       .addCase(fetchProductDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.product = action.payload;
+        state.selectedProduct = action.payload;
       })
       .addCase(fetchProductDetails.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error.message || "Failed to fetch product";
+      })
+
+      // ✅ Similar Products
+      .addCase(fetchSimilarProducts.pending, (state) => {
+        state.similarLoading = true;
+      })
+      .addCase(fetchSimilarProducts.fulfilled, (state, action) => {
+        state.similarLoading = false;
+        state.similarProducts = action.payload.products || [];
+      })
+      .addCase(fetchSimilarProducts.rejected, (state) => {
+        state.similarLoading = false;
+        state.similarProducts = [];
       });
   },
 });

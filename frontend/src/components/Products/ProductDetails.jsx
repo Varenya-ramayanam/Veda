@@ -1,24 +1,77 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
-import "react-toastify/dist/ReactToastify.css";
-import ProductGrid from "./ProductGrid";
-import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import {
+  fetchProductDetails,
+  fetchSimilarProducts,
+} from "@/redux/slices/productSlice";
+import { addToCart } from "@/redux/slices/cartSlice";
 
-const ProductDetails = () => {
-  const product = useSelector((state) => state.products?.product);
+const ProductDetails = ({ productId }) => {
+  const dispatch = useDispatch();
+  const { id } = useParams();
+  const productFetchId = productId || id;
 
-  const [selectedImage, setSelectedImage] = useState(product?.image?.[0]?.url || "");
+  const [selectedImage, setSelectedImage] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedDimension, setSelectedDimension] = useState(product?.dimensions?.[0] || "");
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
+  const { selectedProduct, loading, error } = useSelector(
+    (state) => state.products
+  );
+  const { user, guestId } = useSelector((state) => state.auth);
+  const product = selectedProduct;
+
+  useEffect(() => {
+    if (productFetchId) {
+      dispatch(fetchProductDetails(productFetchId));
+      dispatch(fetchSimilarProducts({ id: productFetchId }));
+    }
+  }, [dispatch, productFetchId]);
+
+  useEffect(() => {
+    if (product?.image?.length > 0) {
+      setSelectedImage(product.image[0].url);
+    }
+  }, [product]);
 
   const handleAddToCart = () => {
-    if (!selectedDimension || quantity < 1) {
-      toast.error("All fields are required to select.");
-    } else {
-      toast.success("Added to cart successfully!");
+    if (!product || !product._id) {
+      toast.error("Product not found");
+      return;
     }
+ 
+    if (quantity < 1) {
+      toast.error("Please select a valid quantity.");
+      return;
+    }
+
+    setIsButtonDisabled(true);
+
+    dispatch(
+      addToCart({
+        productId: product._id,
+        quantity,
+        guestId,
+        userId: user?.id,
+        color: product.color || "default", // Assuming product has a color field
+      })
+    )
+      .then(() => {
+        toast.success("Product added to cart successfully!");
+        setQuantity(1);
+      })
+      .catch(() => {
+        toast.error("Failed to add product to cart.");
+      })
+      .finally(() => {
+        setIsButtonDisabled(false);
+      });
   };
 
+  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (error) return <div className="text-center py-10 text-red-500">Error: {error}</div>;
   if (!product) return <div className="text-center py-10">No product found.</div>;
 
   return (
@@ -52,7 +105,7 @@ const ProductDetails = () => {
                   ? selectedImage
                   : `${import.meta.env.VITE_BACKEND_URL}${selectedImage}`
               }
-              alt="Selected Painting"
+              alt="Selected Product"
               className="w-full h-auto max-h-[600px] object-cover rounded-lg shadow-lg"
             />
           </div>
@@ -81,37 +134,18 @@ const ProductDetails = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 mt-4">
               <div>
-                <span className="font-semibold">Material:</span> {product.material}
+                <span className="font-semibold">Material:</span>{" "}
+                {product.material}
               </div>
               <div>
                 <span className="font-semibold">Brand:</span> {product.brand}
               </div>
-              <div>
-                <span className="font-semibold">Dimensions:</span> {selectedDimension}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <label className="block mb-1 font-medium text-gray-800 text-sm">Select Dimensions:</label>
-              <div className="flex flex-wrap gap-2">
-                {product.dimensions?.map((dim, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedDimension(dim)}
-                    className={`px-2 py-1 text-sm rounded border ${
-                      selectedDimension === dim
-                        ? "bg-black text-white border-black"
-                        : "bg-white text-black border-gray-300"
-                    }`}
-                  >
-                    {dim}
-                  </button>
-                ))}
-              </div>
             </div>
 
             <div className="mt-6 flex items-center gap-4 flex-wrap">
-              <label className="font-medium text-base text-gray-800">Quantity:</label>
+              <label className="font-medium text-base text-gray-800">
+                Quantity:
+              </label>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -132,9 +166,10 @@ const ProductDetails = () => {
 
           <button
             onClick={handleAddToCart}
+            disabled={isButtonDisabled}
             className="mt-6 w-full bg-black text-white py-3 rounded-lg text-lg font-medium hover:bg-gray-800 transition"
           >
-            Add to Cart
+            {isButtonDisabled ? "Adding..." : "Add to Cart"}
           </button>
         </div>
       </div>

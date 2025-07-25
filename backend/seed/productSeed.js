@@ -26,7 +26,12 @@ const products = [
       {
         url: "https://picsum.photos/seed/lakshmi/400/500",
         altText: "Terracotta Lakshmi Diya"
+      },
+      {
+        url: "https://picsum.photos/seed/lakshmi2/400/500",
+        altText: "Terracotta Lakshmi Diya Side View"
       }
+
     ],
     isFeatured: true,
     isNewArrival: true,
@@ -54,6 +59,10 @@ const products = [
       {
         url: "https://picsum.photos/seed/krishna/400/500",
         altText: "Krishna Wall Art"
+      },
+      {
+        url: "https://picsum.photos/seed/krishna2/400/500",
+        altText: "Krishna Wall Art Side View"
       }
     ],
     isFeatured: true,
@@ -81,6 +90,10 @@ const products = [
       {
         url: "https://picsum.photos/seed/rangoli/400/500",
         altText: "Rangoli Kit"
+      },
+      {
+        url: "https://picsum.photos/seed/rangoli2/400/500",
+        altText: "Rangoli Kit Side View"
       }
     ],
     isFeatured: false,
