@@ -2,13 +2,22 @@ const Order = require("../models/orderModel");
 
 
 const getOrders = async (req, res) => {
-    try {
-        const orders = await Order.find();
-        res.json(orders);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-}
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 });
+    const totalOrders = orders.length;
+    const totalSales = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+    res.status(200).json({
+      orders,
+      totalOrders,
+      totalSales,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 
 const updateOrder = async (req, res) => {
     try {

@@ -1,14 +1,10 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  __DO_NOT_USE__ActionTypes,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-//  Fetch all orders (admin only)
+// Fetch all orders (admin only)
 export const fetchOrders = createAsyncThunk(
   "adminOrders/fetchOrders",
-  async (__DO_NOT_USE__ActionTypes, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders`,
@@ -18,7 +14,7 @@ export const fetchOrders = createAsyncThunk(
           },
         }
       );
-      return response.data;
+      return response.data; // Should be { orders, totalOrders, totalSales }
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -66,66 +62,55 @@ export const deleteOrder = createAsyncThunk(
   }
 );
 
-
 const adminOrderSlice = createSlice({
   name: "adminOrders",
-    initialState: {
-        orders: [],
-        totalOrders: 0,
-        totalSales: 0,
-        loading: false,
-        error: null,
-    },
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchOrders.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(fetchOrders.fulfilled, (state, action) => {
-                state.loading = false;
-                state.orders = action.payload.orders;
-                state.totalOrders = action.payload.totalOrders;
-                state.totalSales = action.payload.totalSales;
-            })
-            .addCase(fetchOrders.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload.message || "Failed to fetch orders";
-            })
-            .addCase(updateOrderStatus.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(updateOrderStatus.fulfilled, (state, action) => {
-                state.loading = false;
-                const updatedOrderIndex = state.orders.findIndex(
-                    (order) => order._id === action.payload._id
-                );
-                if (updatedOrderIndex !== -1) {
-                    state.orders[updatedOrderIndex] = action.payload;
-                }
-            })
-            .addCase(updateOrderStatus.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload.message || "Failed to update order status";
-            })
-            .addCase(deleteOrder.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(deleteOrder.fulfilled, (state, action) => {
-                state.loading = false;
-                state.orders = state.orders.filter(
-                    (order) => order._id !== action.payload._id
-                );
-            })
-            .addCase(deleteOrder.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload.message || "Failed to delete order";
-            }   
+  initialState: {
+    orders: [],
+    totalOrders: 0,
+    totalSales: 0,
+    loading: false,
+    error: null,
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchOrders.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload.orders;
+        state.totalOrders = action.payload.totalOrders;
+        state.totalSales = action.payload.totalSales;
+      })
+      .addCase(fetchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Failed to fetch orders";
+      })
+      .addCase(updateOrderStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateOrderStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedIndex = state.orders.findIndex(
+          (order) => order._id === action.payload._id
         );
-    }
+        if (updatedIndex !== -1) {
+          state.orders[updatedIndex] = action.payload;
+        }
+      })
+      .addCase(updateOrderStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Failed to update order";
+      })
+      .addCase(deleteOrder.fulfilled, (state, action) => {
+        state.orders = state.orders.filter(
+          (order) => order._id !== action.payload._id
+        );
+      });
+  },
 });
 
 export default adminOrderSlice.reducer;

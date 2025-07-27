@@ -10,15 +10,15 @@ const {
 } = require("../controllers/productAdminController");
 
 // @route   GET /api/admin/products
-router.get("/products", protect, admin, getProducts);
+router.get("/", protect, admin, getProducts);
 
 // @route   POST /api/admin/products
-router.post("/products", protect, admin, createProducts);
+router.post("/", protect, admin, createProducts);
 
 // @route   PUT /api/admin/products/:id
-router.put("/products/:id", protect, admin, updateProduct);
+router.put("/:id", protect, admin, updateProduct);
 
 // @route   DELETE /api/admin/products/:id
-router.delete("/products/:id", protect, admin, deleteProduct);
+router.delete("/:id", protect, admin, deleteProduct);
 
 module.exports = router;
