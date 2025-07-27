@@ -1,68 +1,36 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const MyOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setTimeout(() => {
-      const fetchedOrders = [
-        {
-          _id: 1,
-          item: "Product 1",
-          createdAt: new Date(),
-          address: "123 Main St",
-          orderItems: [
-            {
-              id: 1,
-              name: "Product 1",
-              quantity: 2,
-              price: 20,
-              image: "https://picsum.photos/200/300?random=1",
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/orders/my-orders`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-          ],
-          totalPrice: 40,
-          isPaid: true,
-        },
-        {
-          _id: 2,
-          item: "Product 2",
-          createdAt: new Date(),
-          address: "456 Elm St",
-          orderItems: [
-            {
-              id: 2,
-              name: "Product 2",
-              quantity: 1,
-              price: 30,
-              image: "https://picsum.photos/200/300?random=2",
-            },
-          ],
-          totalPrice: 30,
-          isPaid: false,
-        },
-        {
-          _id: 3,
-          item: "Product 3",
-          createdAt: new Date(),
-          address: "789 Oak St",
-          orderItems: [
-            {
-              id: 3,
-              name: "Product 3",
-              quantity: 3,
-              price: 15,
-              image: "https://picsum.photos/200/300?random=3",
-            },
-          ],
-          totalPrice: 45,
-          isPaid: true,
-        },
-      ];
-      setOrders(fetchedOrders);
-      setLoading(false);
-    }, 1000);
+          }
+        );
+        setOrders(res.data.orders);
+      } catch (err) {
+        const errMsg = err.response?.data?.message || "Failed to fetch orders";
+        setError(errMsg);
+        toast.error(errMsg);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, []);
 
   return (
@@ -71,9 +39,13 @@ const MyOrdersPage = () => {
 
       {loading ? (
         <div className="text-center text-gray-500">Loading orders...</div>
+      ) : error ? (
+        <div className="text-center text-red-500">{error}</div>
+      ) : orders.length === 0 ? (
+        <div className="text-center text-gray-500">No orders found.</div>
       ) : (
         <>
-          {/* ✅ Table for medium+ screens */}
+          {/* Table View */}
           <div className="hidden sm:block overflow-x-auto shadow-md sm:rounded-lg border border-gray-200">
             <table className="min-w-full text-sm text-left text-gray-700">
               <thead className="bg-gray-100 text-xs uppercase text-gray-600">
@@ -83,38 +55,39 @@ const MyOrdersPage = () => {
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Address</th>
                   <th className="py-3 px-4">Items</th>
-                  <th className="py-3 px-4">Total Price</th>
-                  <th className="py-3 px-4">Paid</th>
+                  <th className="py-3 px-4">Total</th>
+                  <th className="py-3 px-4">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
-                  <tr
-                    key={order._id}
-                    className="bg-white border-b hover:bg-gray-50 transition"
-                  >
+                  <tr key={order._id} className="bg-white border-b hover:bg-gray-50 transition">
                     <td className="py-3 px-4">
-                      <img
-                        src={order.orderItems[0].image}
-                        alt={order.orderItems[0].name}
-                        className="w-12 h-12 object-cover rounded-lg border"
-                      />
+                      {order.products?.[0]?.image ? (
+                        <img
+                          src={order.products[0].image}
+                          alt={order.products[0].name}
+                          className="w-12 h-12 object-cover rounded-lg border"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-100 flex items-center justify-center text-xs text-gray-500 rounded-lg">
+                          N/A
+                        </div>
+                      )}
                     </td>
                     <td className="py-3 px-4">
-                      <Link
-                        to={`/order/${order._id}`}
-                        className="text-blue-600 hover:underline"
-                      >
+                      <Link to={`/order/${order._id}`} className="text-blue-600 hover:underline">
                         #{order._id}
                       </Link>
                     </td>
-                    <td className="py-3 px-4">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                    <td className="py-3 px-4">{new Date(order.createdAt).toLocaleDateString("en-IN")}</td>
+                    <td className="py-3 px-4 text-sm">
+                      {order.address?.doorNo}, {order.address?.street},{" "}
+                      {order.address?.city} - {order.address?.pincode}
                     </td>
-                    <td className="py-3 px-4">{order.address}</td>
                     <td className="py-3 px-4">
-                      {order.orderItems.map((item) => (
-                        <div key={item.id}>
+                      {order.products?.map((item, i) => (
+                        <div key={i}>
                           {item.name} × {item.quantity}
                         </div>
                       ))}
@@ -123,12 +96,14 @@ const MyOrdersPage = () => {
                     <td className="py-3 px-4">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          order.isPaid
+                          order.status === "Delivered"
                             ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-600"
+                            : order.status === "Cancelled"
+                            ? "bg-red-100 text-red-600"
+                            : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {order.isPaid ? "Paid" : "Pending"}
+                        {order.status}
                       </span>
                     </td>
                   </tr>
@@ -137,7 +112,7 @@ const MyOrdersPage = () => {
             </table>
           </div>
 
-          {/* ✅ Card view for small screens */}
+          {/* Card View */}
           <div className="sm:hidden space-y-4">
             {orders.map((order) => (
               <Link
@@ -146,43 +121,49 @@ const MyOrdersPage = () => {
                 className="block bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition"
               >
                 <div className="flex items-center gap-4 mb-2">
-                  <img
-                    src={order.orderItems[0].image}
-                    alt={order.orderItems[0].name}
-                    className="w-16 h-16 rounded-lg object-cover border"
-                  />
+                  {order.products?.[0]?.image ? (
+                    <img
+                      src={order.products[0].image}
+                      alt={order.products[0].name}
+                      className="w-16 h-16 rounded-lg object-cover border"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                      No Image
+                    </div>
+                  )}
                   <div>
-                    <p className="text-sm text-gray-700 font-medium">
-                      Order #{order._id}
-                    </p>
+                    <p className="text-sm text-gray-700 font-medium">Order #{order._id}</p>
                     <p className="text-xs text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toLocaleDateString("en-IN")}
                     </p>
                   </div>
                 </div>
-                <div className="text-sm text-gray-600">
-                  <strong>Address:</strong> {order.address}
+                <div className="text-sm text-gray-600 mb-1">
+                  <strong>Address:</strong>{" "}
+                  {order.address?.doorNo}, {order.address?.street},{" "}
+                  {order.address?.city} - {order.address?.pincode}
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 mb-1">
                   <strong>Items:</strong>{" "}
-                  {order.orderItems.map((item) => (
-                    <span key={item.id}>
-                      {item.name} × {item.quantity},{" "}
-                    </span>
-                  ))}
+                  {order.products
+                    ?.map((item) => `${item.name} × ${item.quantity}`)
+                    .join(", ")}
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 mb-1">
                   <strong>Total:</strong> ₹{order.totalPrice}
                 </div>
-                <div className="mt-1">
+                <div>
                   <span
                     className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                      order.isPaid
+                      order.status === "Delivered"
                         ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-600"
+                        : order.status === "Cancelled"
+                        ? "bg-red-100 text-red-600"
+                        : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {order.isPaid ? "Paid" : "Pending"}
+                    {order.status}
                   </span>
                 </div>
               </Link>

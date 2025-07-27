@@ -1,73 +1,80 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const OrderDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchOrder = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+      setOrder(res.data);
+      setError(null);
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to fetch order";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const mockOrderDetails = {
-      _id: id,
-      createdAt: new Date().toISOString(),
-      isPaid: true,
-      isDelivered: false,
-      paymentMethod: "PayPal",
-      shippingMethod: "Standard Shipping",
-      shippingAddress: {
-        name: "John Doe",
-        phone: "1234567890",
-        doorNo: "123",
-        street: "Main St",
-        city: "Cityville",
-        pincode: "123456",
-      },
-      checkoutItems: [
-        {
-          productId: 1,
-          name: "KeyChain",
-          type: "Customized",
-          quantity: 1,
-          price: 200,
-          image: "https://picsum.photos/id/1/200/200?random=1",
-        },
-        {
-          productId: 2,
-          name: "KeyChain",
-          type: "Customized",
-          quantity: 1,
-          price: 200,
-          image: "https://picsum.photos/id/2/200/200?random=2",
-        },
-        {
-          productId: 3,
-          name: "KeyChain",
-          type: "Customized",
-          quantity: 2,
-          price: 200,
-          image: "https://picsum.photos/id/3/200/200?random=3",
-        },
-      ],
-    };
-    setOrder(mockOrderDetails);
+    fetchOrder();
   }, [id]);
 
-  if (!order) return <p className="p-6 text-center text-gray-600">No order details found.</p>;
+  const handleCancelOrder = async () => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
+    try {
+      setCancelLoading(true);
+      await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}/cancel`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+      toast.success("Order cancelled successfully!");
+      await fetchOrder();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Cancel failed");
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  if (loading) return <p className="p-6 text-center text-gray-500">Loading order...</p>;
+  if (error) return <p className="p-6 text-center text-red-500">{error}</p>;
+  if (!order) return <p className="p-6 text-center text-gray-500">No order found.</p>;
 
   const {
     _id,
     createdAt,
-    isPaid,
+    status,
     isDelivered,
     paymentMethod,
-    shippingMethod,
-    shippingAddress,
-    checkoutItems,
+    address,
+    products,
+    totalPrice,
   } = order;
-
-  const totalAmount = checkoutItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-10">
@@ -86,10 +93,14 @@ const OrderDetails = () => {
           <div className="flex flex-col gap-2 mt-4 sm:mt-0">
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium w-fit ${
-                isPaid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-600"
+                status === "Cancelled"
+                  ? "bg-red-100 text-red-600"
+                  : status === "Delivered"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-yellow-100 text-yellow-700"
               }`}
             >
-              {isPaid ? "Payment Approved" : "Payment Pending"}
+              {status}
             </span>
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium w-fit ${
@@ -101,23 +112,18 @@ const OrderDetails = () => {
           </div>
         </div>
 
-        {/* Shipping & Payment Info */}
+        {/* Payment & Address */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <div>
             <h4 className="text-lg font-semibold mb-2">Payment</h4>
             <p className="text-gray-700">Method: {paymentMethod}</p>
-            <p className="text-gray-700">Status: {isPaid ? "Paid" : "Pending"}</p>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-2">Shipping</h4>
-            <p className="text-gray-700">Method: {shippingMethod}</p>
           </div>
           <div>
             <h4 className="text-lg font-semibold mb-2">Address</h4>
             <p className="text-gray-700 text-sm leading-6">
-              {shippingAddress.name} ({shippingAddress.phone})<br />
-              {shippingAddress.doorNo}, {shippingAddress.street},<br />
-              {shippingAddress.city} - {shippingAddress.pincode}
+              {address?.name} ({address?.phone})<br />
+              {address?.doorNo}, {address?.street},<br />
+              {address?.city} - {address?.pincode}
             </p>
           </div>
         </div>
@@ -137,7 +143,7 @@ const OrderDetails = () => {
               </tr>
             </thead>
             <tbody>
-              {checkoutItems.map((item) => (
+              {products.map((item) => (
                 <tr key={item.productId} className="border-t">
                   <td className="px-6 py-4 flex items-center gap-4">
                     <img
@@ -163,23 +169,31 @@ const OrderDetails = () => {
                 <td colSpan="3" className="px-6 py-4 text-right">
                   Total Amount:
                 </td>
-                <td className="px-6 py-4 text-[#ea2e0e] font-bold text-lg">
-                  ₹{totalAmount}
-                </td>
+                <td className="px-6 py-4 text-[#ea2e0e] font-bold text-lg">₹{totalPrice}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Back to Orders */}
-      <div className="text-center mt-8">
+      {/* Actions */}
+      <div className="text-center mt-8 flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           to="/my-orders"
-          className="inline-block bg-[#ea2e0e] hover:bg-[#d8270c] text-white font-semibold px-6 py-3 rounded-full transition duration-200"
+          className="inline-block bg-gray-800 hover:bg-gray-700 text-white font-semibold px-6 py-3 rounded-full transition duration-200"
         >
           Back to Orders
         </Link>
+
+        {status !== "Cancelled" && status !== "Delivered" && (
+          <button
+            onClick={handleCancelOrder}
+            disabled={cancelLoading}
+            className="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-full transition duration-200"
+          >
+            {cancelLoading ? "Cancelling..." : "Cancel Order"}
+          </button>
+        )}
       </div>
     </div>
   );

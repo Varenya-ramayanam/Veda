@@ -76,6 +76,7 @@ const authSlice = createSlice({
             localStorage.removeItem("userinfo");
             localStorage.removeItem("userToken");
             localStorage.setItem("guestId", state.guestId);
+            localStorage.removeItem("cart");
         },
         generateGuestId: (state) => {
             state.guestId = `guest_${new Date().getTime()}`;

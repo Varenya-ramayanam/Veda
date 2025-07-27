@@ -1,28 +1,43 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LoginAnimation from "../components/Animations/LoginAnimation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/slices/Authslice";
 import { toast } from "react-hot-toast";
 
 const Login = () => {
-
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
-  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const result = await dispatch(login({ email, password }));
     if (login.fulfilled.match(result)) {
-      navigate("/");
+      const user = result.payload;
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } else {
       toast.error(result.payload?.message || "Login failed");
     }
   };
-
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white px-4">
@@ -30,7 +45,7 @@ const Login = () => {
 
         {/* Left: Login Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-12">
-          <form className="w-full max-w-md space-y-6">
+          <form className="w-full max-w-md space-y-6" onSubmit={handleLogin}>
             <div className="text-center">
               <h2 className="text-3xl font-bold mb-2">Veda</h2>
               <h3 className="text-xl font-semibold">Hey there!!</h3>
@@ -39,7 +54,6 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-semibold mb-1">Email</label>
               <input
@@ -51,7 +65,6 @@ const Login = () => {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-semibold mb-1">Password</label>
               <input
@@ -63,16 +76,13 @@ const Login = () => {
               />
             </div>
 
-            {/* Login Button */}
             <button
               type="submit"
               className="w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition"
-              onClick={handleLogin}
             >
               Login
             </button>
 
-            {/* Register Link */}
             <p className="text-center text-sm">
               Don't have an account?{" "}
               <Link to="/register" className="text-blue-500 hover:underline">
