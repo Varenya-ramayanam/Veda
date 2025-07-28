@@ -18,11 +18,6 @@ const productSchema = mongoose.Schema(
     discountPrice: {
       type: Number,
     },
-    stock: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
     stockAvailability: {
       type: String,
       enum: ["inStock", "preOrder", "outOfStock"],

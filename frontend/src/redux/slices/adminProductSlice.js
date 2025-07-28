@@ -21,47 +21,51 @@ export const fetchAdminProducts = createAsyncThunk(
     }
 );
 
-// async thunk to add a new product
 export const addProduct = createAsyncThunk(
-    "admin/addProduct",
-    async (productData, { rejectWithValue }) => {
-        try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_BACKEND_URL}/api/admin/products`,
-                productData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
-                }
-            );
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data);
+  "adminProducts/addProduct",
+  async (formData, { rejectWithValue, getState }) => {
+    try {
+      const token = getState().auth.user?.token; // Adjust path to where you store token
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/products`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
         }
+      );
+
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
+  }
 );
 
-// Async thunk to update a product
+
 export const updateProduct = createAsyncThunk(
-    "admin/updateProduct",
-    async ({ id, productData }, { rejectWithValue }) => {
-        try {
-            const response = await axios.put(
-                `${import.meta.env.VITE_BACKEND_URL}/api/admin/products/${id}`,
-                productData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
-                }
-            );
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data);
+  "admin/updateProduct",
+  async ({ id, productData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/products/${id}`,
+        productData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
         }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
     }
+  }
 );
+
 
 // Async thunk to delete a product
 export const deleteProduct = createAsyncThunk(
