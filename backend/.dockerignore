@@ -1,0 +1,9 @@
+node_modules
+uploads
+.git
+Dockerfile
+.dockerignore
+.env
+.vscode
+*.log
+.env.production

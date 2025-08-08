@@ -25,7 +25,6 @@ export const addProduct = createAsyncThunk(
   "adminProducts/addProduct",
   async (formData, { rejectWithValue, getState }) => {
     try {
-      const token = getState().auth.user?.token; // Adjust path to where you store token
 
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/products`,

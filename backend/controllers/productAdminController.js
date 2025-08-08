@@ -1,13 +1,30 @@
 const fs = require("fs");
 const Product = require("../models/productModel");
 const cloudinary = require("../utils/cloudinary");
+const redis = require("../config/redis");
 
 // @desc    Get all products (Admin)
 // @route   GET /api/admin/products
 // @access  Private/Admin
 const getProducts = async (req, res) => {
   try {
+    const cacheKey = "admin:products";
+
+    if (redis) {
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        console.log("✅ Serving from Redis cache");
+        return res.status(200).json(JSON.parse(cached));
+      }
+    }
+
     const products = await Product.find({ isDeleted: false }).sort({ createdAt: -1 });
+
+    if (redis) {
+      await redis.set(cacheKey, JSON.stringify(products), "EX", 300); // 5 minutes
+      console.log("📦 Cached products to Redis");
+    }
+
     res.status(200).json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -20,27 +37,16 @@ const getProducts = async (req, res) => {
 const createProducts = async (req, res) => {
   try {
     const {
-      name,
-      description,
-      price,
-      sku,
-      stock,
-      category,
-      collections,
-      material,
-      color,
+      name, description, price, sku, stock,
+      category, collections, material, color,
     } = req.body;
 
-    if (
-      !name || !description || !price || !sku || !stock ||
-      !category || !collections || !material || !color
-    ) {
+    if (!name || !description || !price || !sku || !stock ||
+        !category || !collections || !material || !color) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
     const uploadedImages = [];
-
-    // console.log("Uploaded files:", req.files); // This will print on server terminal
 
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
@@ -54,27 +60,26 @@ const createProducts = async (req, res) => {
           altText: name || "Product Image",
         });
 
-        fs.unlinkSync(file.path); // clean up local temp file
+        fs.unlinkSync(file.path);
       }
     }
 
     const newProduct = new Product({
-      name,
-      description,
-      price,
-      sku,
-      stock,
-      category,
-      collections,
-      material,
-      color,
+      name, description, price, sku, stock,
+      category, collections, material, color,
       image: uploadedImages,
     });
 
     const createdProduct = await newProduct.save();
+
+    if (redis) {
+      await redis.del("admin:products");
+      await redis.del("products:all");
+    }
+
     res.status(201).json(createdProduct);
   } catch (err) {
-    console.error("Product creation failed:", err);
+    console.error("❌ Product creation failed:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -88,16 +93,9 @@ const updateProduct = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     const {
-      name,
-      description,
-      price,
-      sku,
-      stock,
-      category,
-      collections,
-      material,
-      color,
-      existingImages, // from frontend, sent as JSON string
+      name, description, price, sku, stock,
+      category, collections, material, color,
+      existingImages,
     } = req.body;
 
     const updatedImages = [];
@@ -108,8 +106,6 @@ const updateProduct = async (req, res) => {
         updatedImages.push(...parsed);
       }
     }
-
-    // console.log("Uploaded files:", req.files); // This will print on server terminal
 
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
@@ -139,9 +135,16 @@ const updateProduct = async (req, res) => {
     product.image = updatedImages;
 
     const updatedProduct = await product.save();
+
+    if (redis) {
+      await redis.del("admin:products");
+      await redis.del("products:all");
+      await redis.del(`product:${req.params.id}`);
+    }
+
     res.status(200).json(updatedProduct);
   } catch (err) {
-    console.error("Product update failed:", err);
+    console.error("❌ Product update failed:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -156,6 +159,12 @@ const deleteProduct = async (req, res) => {
 
     product.isDeleted = true;
     await product.save();
+
+    if (redis) {
+      await redis.del("admin:products");
+      await redis.del("products:all");
+      await redis.del(`product:${req.params.id}`);
+    }
 
     res.status(200).json({ message: "Product marked as deleted" });
   } catch (err) {
